@@ -39,6 +39,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: jar-file
+        path: target/ # Specify the path to download the artifact
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
