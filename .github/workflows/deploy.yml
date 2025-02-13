@@ -64,8 +64,9 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
         echo "Stopping existing Java process..."
-        if pgrep -f "java -jar"; then
-          pkill -f "java -jar"
+        PID=$(pgrep -f "java -jar")
+        if [ -n "$PID" ]; then
+          kill $PID
           echo "Java process stopped."
         else
           echo "No Java process found."
