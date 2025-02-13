@@ -65,7 +65,11 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
         echo "Stopping existing Java process..."
         pkill -f "java -jar" || true # Stop the existing Java process
-        echo "Java process stopped."
+        if [ $? -eq 0 ]; then
+          echo "Java process stopped."
+        else
+          echo "No Java process found."
+        fi
         '
 
     - name: Deploy to AWS EC2
