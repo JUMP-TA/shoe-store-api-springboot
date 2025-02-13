@@ -66,6 +66,7 @@ jobs:
         echo "Stopping existing Java process..."
         PID=$(pgrep -f "java -jar")
         if [ -n "$PID" ]; then
+          echo "Found Java process with PID: $PID"
           kill $PID
           echo "Java process stopped."
         else
