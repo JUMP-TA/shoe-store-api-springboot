@@ -53,7 +53,7 @@ jobs:
         HOST: ${{ secrets.EC2_HOST }}
       run: |
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-        scp -o StrictHostKeyChecking=no -i private_key target/*.jar ec2-user@${HOST}:~/app.jar
+        scp -o StrictHostKeyChecking=no -i private_key target/shoestore-1.0-SNAPSHOT.jar ec2-user@${HOST}:~/app.jar
 
     - name: Deploy to AWS EC2
       env:
