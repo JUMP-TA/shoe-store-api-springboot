@@ -67,5 +67,6 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
           sudo yum update -y
           sudo yum install -y java-11-amazon-corretto
+          pkill -f "java -jar" || true # Stop the existing Java process
           nohup java -jar /home/ec2-user/*.jar > app.log 2>&1 &
           '
