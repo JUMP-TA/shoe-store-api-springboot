@@ -57,28 +57,34 @@ jobs:
         ls -al target/ # List the contents of the target directory for debugging
         scp -o StrictHostKeyChecking=no -i private_key target/*.jar ec2-user@${HOST}:~/app.jar
 
-    - name: Deploy to AWS EC2
+    - name: Stop existing Java process
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         HOST: ${{ secrets.EC2_HOST }}
       run: |
-          ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
-          sudo yum update -y
-          sudo yum install -y java-11-amazon-corretto
-          pkill -f "java -jar" || true # Stop the existing Java process
-          nohup java -jar /home/ec2-user/*.jar > app.log 2>&1 &
-          sleep 10 # Wait for the application to start
-          tail -n 50 app.log # Display the last 50 lines of the application log
-          echo "Deployment completed successfully"
-          '
+        ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
+        pkill -f "java -jar" || true # Stop the existing Java process
+        '
+
+    - name: Deploy to AWS EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+      run: |
+        ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
+        sudo yum update -y
+        sudo yum install -y java-11-amazon-corretto
+        nohup java -jar /home/ec2-user/*.jar > app.log 2>&1 &
+        sleep 10 # Wait for the application to start
+        tail -n 50 app.log # Display the last 50 lines of the application log
+        echo "Deployment completed successfully"
+        '
 
     - name: Check application status
       env:
         PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         HOST: ${{ secrets.EC2_HOST }}
       run: |
-          ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
-          ps aux | grep java
-          '
+        ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
+        ps aux | grep java
+        '
