@@ -67,7 +67,7 @@ jobs:
         PID=$(pgrep -f "java -jar")
         if [ -n "$PID" ]; then
           echo "Found Java process with PID: $PID"
-          kill $PID
+          kill -9 $PID || true
           echo "Java process stopped."
         else
           echo "No Java process found."
