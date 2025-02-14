@@ -68,8 +68,13 @@ jobs:
         if [ -n "$PID" ]; then
           echo "Found Java process with PID: $PID"
           kill $PID || true
-          sleep 3000 # Wait for the process to stop
-          echo "Java process stopped."
+          sleep 60000 # Wait for the process to stop
+          if pgrep -f "java -jar" > /dev/null; then
+            echo "Failed to stop Java process with PID: $PID"
+            exit 1
+          else
+            echo "Java process stopped."
+          fi
         else
           echo "No Java process found."
         fi
