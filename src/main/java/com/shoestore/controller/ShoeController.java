@@ -16,6 +16,7 @@ public class ShoeController {
         shoeStore.put(1, new Shoe(1, "Air Max", "Nike", 120.00, 10));
         shoeStore.put(2, new Shoe(2, "UltraBoost", "Adidas", 180.00, 5));
         shoeStore.put(3, new Shoe(3, "Boot", "Carhart", 120.00, 15));
+        shoeStore.put(4, new Shoe(4, "Sneaker", "Puma", 120.00, 12));
     }
 
     @GetMapping("/shoes")
