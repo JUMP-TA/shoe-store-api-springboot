@@ -48,6 +48,16 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
+    - name: Delete old JAR file on EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+      run: |
+        ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
+        echo "Deleting old JAR file..."
+        rm -f /home/ec2-user/app.jar
+        '
+
     - name: Copy JAR file to EC2
       env:
         PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
@@ -55,7 +65,7 @@ jobs:
       run: |
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
         ls -al target/ # List the contents of the target directory for debugging
-        scp -o StrictHostKeyChecking=no -i private_key target/*.jar ec2-user@${HOST}:~/app.jar
+        scp -o StrictHostKeyChecking=no -i private_key target/*.jar ec2-user@${HOST}:/home/ec2-user/app.jar
 
     - name: Stop existing Java process
       env:
@@ -81,11 +91,12 @@ jobs:
         echo "Deployment completed successfully"
         '
 
-    # - name: Check application status
-    #   env:
-    #     PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-    #     HOST: ${{ secrets.EC2_HOST }}
-    #   run: |
-    #     ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
-    #     sudo systemctl status myapp.service
-    #     '
+    - name: Check application status
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+      run: |
+        ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
+        sudo systemctl status myapp.service
+        sudo journalctl -u myapp.service -n 50 # Display the last 50 lines of the service log
+        '
