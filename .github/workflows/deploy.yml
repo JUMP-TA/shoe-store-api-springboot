@@ -64,20 +64,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
         echo "Stopping existing Java process..."
-        PID=$(pgrep -f "java -jar")
-        if [ -n "$PID" ]; then
-          echo "Found Java process with PID: $PID"
-          kill $PID || true
-          sleep 60 # Wait for the process to stop
-          if pgrep -f "java -jar" > /dev/null; then
-            echo "Failed to stop Java process with PID: $PID"
-            exit 1
-          else
-            echo "Java process stopped."
-          fi
-        else
-          echo "No Java process found."
-        fi
+        sudo systemctl stop myapp.service
         '
 
     - name: Deploy to AWS EC2
@@ -88,9 +75,9 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
         sudo yum update -y
         sudo yum install -y java-11-amazon-corretto
-        nohup java -jar /home/ec2-user/*.jar > app.log 2>&1 &
+        sudo systemctl start myapp.service
         sleep 10 # Wait for the application to start
-        tail -n 50 app.log # Display the last 50 lines of the application log
+        sudo systemctl status myapp.service
         echo "Deployment completed successfully"
         '
 
@@ -100,5 +87,5 @@ jobs:
         HOST: ${{ secrets.EC2_HOST }}
       run: |
         ssh -o StrictHostKeyChecking=no -i private_key ec2-user@${HOST} '
-        ps aux | grep java
+        sudo systemctl status myapp.service
         '
